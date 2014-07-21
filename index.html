@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" manifest="/cache.manifest">
+    <!-- OT Timer | (c) 2014 Alexandra Ellwood | MIT License -->
+    <head>
+        <meta charset="utf-8" />
+        <title>OT Timer</title>
+        <script src="jquery.min.js" type="text/javascript"></script>
+        <style>
+            html,
+            body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote,
+            pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd,
+            q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt,
+            dd, ol, ul, li, fieldset, form, label, input, button, legend, table, caption,
+            tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed,
+            figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section,
+            summary, time, mark, audio, video {
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                box-sizing: border-box;
+            }
+            html {
+                font-size: 17px;
+                font-weight: normal;
+                font-style: normal;
+                font-family: Arial, sans-serif;
+                color: #333333;
+            }
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                text-align: center;
+            }
+            .helper {
+                display: inline-block;
+                max-width: 400px;
+                padding: 1rem 12px;
+            }
+            @media (min-width: 424px) {
+                .helper {
+                    max-width: 400px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+            }
+            .status, .controls, hr {
+                margin-bottom: 1.5rem;
+                text-align: center;
+            }
+            .status {
+                display: table;
+                width: 100%;
+            }
+            .status > div {
+                display: table-row;
+            }
+            .label, .value {
+                display: table-cell;
+                margin: 0;
+                padding-bottom: 0.5rem;
+                width: 50%;
+            }
+            .label {
+                padding-right: 0.5em;
+                font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+                font-weight: bold;
+                font-size: 1.25rem;
+                color: #444444;
+                min-width: 7em;
+                text-align: right;
+                text-transform: uppercase;
+            }
+            .value {
+                font-size: 3.5rem;
+                text-align: left;
+            }
+            .one-position .p_counter,
+            .one-position .p_counter .label {
+                color: #bbbbbb;
+            }
+            .one-position .p_count_plural {
+                display: none;
+            }
+            .controls button {
+                font-size: 1.5rem;
+                font-weight: bold;
+                text-transform: uppercase;
+            }
+
+            .config {
+                display: inline-block;
+                text-align: left;
+            }
+            .config, .config input {
+                font-size: 1.25rem;
+                margin-bottom: 1rem;
+            }
+            .config input {
+                width: 3rem;
+                text-align: right;
+            }
+        </style>
+        <link rel="apple-touch-icon" href="/icon.png" /><!-- https://github.com/driftyco/ionicons | MIT License -->
+        <link rel="apple-touch-icon" sizes="76x76" href="/icon-76x76.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="/icon-120x120.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="/icon-152x152.png">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, minimal-ui" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    </head>
+    <body>
+        <div class="helper">
+            <div class="status">
+                <div><h1 class="label">Repetition</h1> <span class="value r">&ndash;</span></div>
+                <div class="p_counter"><h1 class="label">Position</h1> <span class="value p">&ndash;</span></div>
+                <div><h1 class="label">Seconds</h1> <span class="value s">&ndash;</span></div>
+            </div>
+            <div class="controls"><button class="next">Next</button> <button class="reset">Reset</button></div>
+            <hr />
+            <div class="config">
+                <div>
+                    <input type="number" pattern="[0-9]*" id="pmax" min="1" value="1" />
+                    <label for="pmax">position<span class="p_count_plural">s</span></label>
+                </div>
+                <div>
+                    <input type="number" pattern="[0-9]*" id="smax" min="1" value="5" />
+                    <label for="smax">second hold</label>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script>
+        $(document).ready(function () {
+            var interval = null,
+                r, p, s;
+
+            $('#pmax').on('change', function (ev) {
+                if ($('#pmax').val() > 1) {
+                    $('.helper').removeClass('one-position');
+                } else {
+                    $('.helper').addClass('one-position');
+                }
+            }).trigger('change');
+
+            $('#pmax, #smax').on('click', function (ev) {
+                $(this).select();
+                this.setSelectionRange(0, 10);
+            });
+
+            $('.next, .status').on('click', function (ev) {
+                if (!$('.status').hasClass('running')) {
+                    $('.status').addClass('running');
+
+                    if ($('#pmax').val() > 1) {
+                        if (r < 1) {
+                            r = 1;
+                        }
+                        p++;
+                        if (p > $('#pmax').val()) {
+                            r++;
+                            p = 1;
+                        }
+                        $('.p').html(p);
+                    } else {
+                        r++;
+                    }
+                    s = 0;
+
+                    $('.r').html(r);
+                    $('.s').html(s);
+
+                    interval = setInterval(function () {
+                        s++;
+                        $('.s').html(s);
+                        if (s >= $('#smax').val()) {
+                            clearInterval(interval);
+                            interval = null;
+                            $('.status').removeClass('running');
+                        }
+                    }, 1000);
+                }
+            });
+
+            $('.reset').on('click', function (ev) {
+                if (interval !== null) {
+                    clearInterval(interval);
+                    interval = null;
+                }
+                r = p = s = 0;
+
+                $('.r, .p, .s').html('&ndash;');
+                $('.status').removeClass('running');
+            }).trigger('click');
+
+            $('.next, .reset, .status').on('touchmove', function () {
+                return false;
+            });
+
+            $('html').on('keydown', function (ev) {
+                switch (ev.which) {
+                    case 78:
+                    case 32:
+                        $('.next').trigger('click');
+                        break;
+
+                    case 82:
+                    case 8:
+                    case 46:
+                        $('.reset').trigger('click');
+                        break;
+                }
+            });
+        });
+    </script>
+</html>
