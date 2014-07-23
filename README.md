@@ -1,2 +1,2 @@
-ot-timer
+OT Timer
 ========

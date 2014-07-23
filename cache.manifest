@@ -1,7 +1,12 @@
 CACHE MANIFEST
+
+# OT Timer files:
+
 /index.html
-/jquery.min.js
-/icon.png
-/icon-76x76.png
-/icon-120x120.png
-/icon-152x152.png
+/javascript/jquery.min.js
+/javascript/common.js
+/css/common.css
+/images/icon.png
+/images/icon-76x76.png
+/images/icon-120x120.png
+/images/icon-152x152.png
